@@ -1,42 +1,60 @@
+// Selecionando os elementos do jogo
 const mario = document.querySelector('.mario');
 const cano = document.querySelector('.cano');
 const nuvem = document.querySelector('.nuvem');
 const fimDejogo = document.querySelector('.fim-de-jogo');
 const botaoReiniciar = document.querySelector('.reiniciar');
+const gameOver = document.querySelector('.game-over');
 
+// Inicializando a pontuação
 let pontuacao = 0;
 
-document .addEventListener('keydown', fazerMarioPular);
+// Adicionando evento de teclado para fazer o Mario pular
+document.addEventListener('keydown', fazerMarioPular);
 
-function fazerMarioPular(){
+let noPulo = false;
+
+// Função para fazer o Mario pular
+function fazerMarioPular() {
+    if (noPulo) return;
+
+    noPulo = true;
+
     mario.classList.add('pular');
-    setTimeout(function(){
+    setTimeout(function () {
         mario.classList.remove('pular');
 
-        pontuacao++;
-
-        atualizarPontuacao();
+        noPulo = false;
     }, 500);
 }
 
-function atualizarPontuacao(){
-
-    console.log(pontuacao);
+// Atualizando a pontuação
+const pontuacaoAtual = document.querySelector('.pontuacao');
+function atualizarPontuacao() {
+    pontuacaoAtual.innerHTML = pontuacao + "m";
+    pontuacao++;
 }
 
-function verificarColisoes(){
-    
+// Atualizando a pontuação a cada 200ms
+let intervalo = setInterval(atualizarPontuacao, 200);
+
+// Elemento para exibir a pontuação final
+let pontuacaoFinal = document.getElementById('pontuacao-final');
+
+// Verificando colisões
+function verificarColisoes() {
     const posicaoCano = cano.offsetLeft;
-
-    const posicaoMaria = parseFloat(getComputedStyle(mario).bottom);
-
+    const posicaoMario = parseFloat(getComputedStyle(mario).bottom);
     const posicaoNuvem = parseFloat(getComputedStyle(nuvem).bottom);
 
-    if(posicaoCano <= 100 && posicaoCano > 0 && posicaoMaria < 60){
+    // Verificando se houve colisão entre o Mario e o cano
+    if (posicaoCano <= 100 && posicaoCano > 0 && posicaoMario < 60) {
         console.log("Voce morreu, sua pontuação foi de: ", pontuacao);
-        pontuacao = 0;
+
+        // Parando o jogo
         pararJogo();
 
+        // Removendo animações e ajustando posições dos elementos
         cano.style.animation = 'none';
         nuvem.style.left = `${posicaoCano}px`;
 
@@ -47,5 +65,27 @@ function verificarColisoes(){
         mario.style.marginLeft = '35px';
 
         nuvem.style.animation = 'nuvem 20s infinite linear';
+        nuvem.style.left = `${posicaoNuvem}px`;
+
+        // Exibindo tela de fim de jogo
+        fimDejogo.style.visibility = 'visible';
     }
 }
+
+// Verificando colisões a cada 10ms
+let loopJogo = setInterval(verificarColisoes, 10);
+
+// Função para parar o jogo
+function pararJogo() {
+    clearInterval(loopJogo);
+    clearInterval(intervalo);
+    console.log("Jogo parado");
+}
+
+// Função para reiniciar o jogo
+function reiniciarJogo() {
+    window.location.reload();
+}
+
+// Adicionando evento de clique no botão de reiniciar
+botaoReiniciar.addEventListener('click', reiniciarJogo);
